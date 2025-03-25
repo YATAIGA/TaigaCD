@@ -1,0 +1,37 @@
+{
+  "job_name": "Si100_bulk_band_structure",
+  "material": {
+    "formula": "Si",
+    "type": "晶體",
+    "crystal_structure": "diamond",
+    "additional_info": {
+      "surface_orientation": "(100)",
+      "note": "計算為塊材性質，非表面態；使用常見 diamond 結構設定，方向設定為 (100)"
+    }
+  },
+  "calculation": {
+    "type": "band_structure",
+    "parameters": {
+      "workflow": ["structure_optimization", "band_structure"],
+      "ecutwfc": 50,
+      "ecutrho": 200,
+      "pseudopotential": "Si.pbe-n-rrkjus.UPF",
+      "kpoints": {
+        "optimization": "6x6x6",
+        "band_structure": "沿高對稱路徑 Γ–X–M–Γ–R–X"
+      },
+      "spin_polarized": false,
+      "relax_type": "vc-relax",
+      "convergence_threshold": 1e-5,
+      "smearing": {
+        "type": "gaussian",
+        "degauss": 0.01
+      },
+      "band_path": "standard_primitive",
+      "use_symmetry": true
+    }
+  },
+  "references": [],
+  "comments": "此計算針對 Si (100) 塊材進行結構優化後，再計算能帶結構，適用於 bulk 材料而非表面態模擬；若有特殊應力條件或摻雜需求，請進一步說明。"
+}
+
