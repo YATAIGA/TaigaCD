@@ -49,6 +49,10 @@ class DFT:
         Returns:
             Espresso: ASE Espresso calculator object.
         """
+
+        # Set pseudo_dir
+        input_data["control"]["pseudo_dir"] = self.pseudo_dir
+
         return Espresso(
             profile=self.profile,
             pseudopotentials=self.pseudopotentials,
@@ -60,12 +64,12 @@ class DFT:
         self,
         input_data: dict,
         kpts: tuple = (8, 8, 8),
-        output_file="relaxed.xyz"
+        output_file="relaxed.cif"
     ):
         """Perform structural relaxation.
 
         Parameters:
-            input_data (dict): QE input_data for relaxation.
+            input_data (dict): Full QE input for relaxation.
             kpts (tuple): Monkhorst-Pack k-point grid.
             output_file (str): File to save relaxed structure.
         """
@@ -80,3 +84,40 @@ class DFT:
 
         write(output_file, self.atoms)
         print(f"[INFO] Relaxation complete. Saved to '{output_file}'.")
+
+    def scf(
+        self, 
+        input_data: dict,
+        kpts: tuple=(12, 12, 12)
+    ):
+        """Perform self-consistent field (SCF) calculation.
+
+        Parameters:
+            input_data (dict): Full QE input for SCF.
+            kpts (tuple): K-point mesh.
+        """
+        if input_data.get("control", {}).get("calculation") != "scf":
+            raise ValueError("Input data must specify 'calculation = scf'.")
+
+        self.atoms.calc = self._set_calculator(input_data, kpts)
+
+        energy = self.atoms.get_potential_energy()
+        print(f"[INFO] SCF complete. Total energy: {energy:.6f} eV")
+    def bands(
+        self,
+        input_data: dict,
+        band_kpts: dict,
+    ):
+        """Perform band structure calculation.
+
+        Parameters:
+            input_data (dict): Full QE input for bands.
+            band_kpts (dict): K-point path info: {'path': str, 'npoints': int}.
+        """
+        if input_data.get("control", {}).get("calculation") != "bands":
+            raise ValueError("Input data must specify 'calculation = bands'.")
+
+        self.atoms.calc = self._set_calculator(input_data, band_kpts)
+
+        energy = self.atoms.get_potential_energy()
+        print("[INFO] Band structure calculation complete.Total energy: {energy:.6f} eV")
