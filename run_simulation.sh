@@ -22,4 +22,4 @@ conda activate taiga
 cd $SLURM_SUBMIT_DIR
 
 # Run simulation
-python -m tests.test_DFT_relax 
+python -m taigacd.core
