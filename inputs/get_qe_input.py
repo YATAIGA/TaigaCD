@@ -1,5 +1,4 @@
-def get_qe_input(
-):
+def get_qe_input():
     """ ASE Espresso calculator input.
 
     Returns:

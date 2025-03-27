@@ -1,8 +1,7 @@
 from ase.build import bulk
 
 
-def get_atoms(
-):
+def get_atoms():
     """ Atomic structures generated.
 
     Returns:

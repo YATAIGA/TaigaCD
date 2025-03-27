@@ -4,6 +4,7 @@ from ase.calculators.espresso import Espresso, EspressoProfile
 from ase.optimize import BFGS
 
 
+OUTPUT_DIR = "./outputs"
 class DFT:
     """Class for managing DFT calculations.
 
@@ -12,7 +13,7 @@ class DFT:
     def __init__(
         self,
         atoms: ase.Atoms,
-        pseudo_dir: str | None = None,
+        pseudo_dir: str | None = "../pseudos",
         command: str = "mpirun -np 4 pw.x"
     ):
         """Initialize DFT object.
@@ -57,14 +58,15 @@ class DFT:
             profile=self.profile,
             pseudopotentials=self.pseudopotentials,
             input_data=input_data,
-            kpts=kpts
+            kpts=kpts,
+            directory='./outputs'
         )
 
     def relax(
         self,
         input_data: dict,
         kpts: tuple = (8, 8, 8),
-        output_file="relaxed.cif"
+        output_file=f"{OUTPUT_DIR}/relaxed.cif"
     ):
         """Perform structural relaxation.
 
@@ -78,8 +80,8 @@ class DFT:
 
         self.atoms.calc = self._set_calculator(input_data, kpts)
 
-        #opt = BFGS(self.atoms, logfile=f"{self.prefix}_relax.log")
-        opt = BFGS(self.atoms, logfile=f"relax.log")
+        # opt = BFGS(self.atoms, logfile=f"{self.prefix}_relax.log")
+        opt = BFGS(self.atoms, logfile=f"{OUTPUT_DIR}/relax.log")
         opt.run(fmax=0.03)
 
         write(output_file, self.atoms)
