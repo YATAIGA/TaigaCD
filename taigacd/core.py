@@ -22,6 +22,11 @@ def main():
             input_data = input_data,
             kpts = kpts
         )
+    elif calc_type == "bands":
+        sim.bands(
+            input_data = input_data,
+            band_kpts = kpts
+        )
 
 if __name__ == "__main__":
     main()
