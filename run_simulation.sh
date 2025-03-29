@@ -14,6 +14,7 @@
 # Load modules
 module purge
 spack load quantum-espresso@7.4
+module load miniconda3
 
 # Activate your conda env (adjust if needed)
 conda activate taiga
