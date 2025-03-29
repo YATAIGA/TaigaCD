@@ -1,6 +1,9 @@
 import ase
 from ase.io import read, write
 from ase.calculators.espresso import Espresso, EspressoProfile
+from ase.calculators.calculator import all_changes
+from ase.spectrum.band_structure import BandStructure
+from ase.dft.kpoints import bandpath
 from ase.optimize import BFGS
 
 
@@ -39,7 +42,8 @@ class DFT:
     def _set_calculator(
         self, 
         input_data: dict,
-        kpts: tuple | dict
+        kpts: tuple | dict,
+        calc_type: str
     ) -> Espresso:
         """Internal method to create an Espresso calculator.
 
@@ -60,6 +64,7 @@ class DFT:
             input_data=input_data,
             kpts=kpts,
             directory='./outputs'
+            # directory=f'./outputs/{calc_type}'
         )
 
     def relax(
@@ -78,7 +83,7 @@ class DFT:
         if input_data.get("control", {}).get("calculation") != "relax":
             raise ValueError("Input data must specify 'calculation = relax'.")
 
-        self.atoms.calc = self._set_calculator(input_data, kpts)
+        self.atoms.calc = self._set_calculator(input_data, kpts, calc_type="relax")
 
         # opt = BFGS(self.atoms, logfile=f"{self.prefix}_relax.log")
         opt = BFGS(self.atoms, logfile=f"{OUTPUT_DIR}/relax.log")
@@ -101,7 +106,7 @@ class DFT:
         if input_data.get("control", {}).get("calculation") != "scf":
             raise ValueError("Input data must specify 'calculation = scf'.")
 
-        self.atoms.calc = self._set_calculator(input_data, kpts)
+        self.atoms.calc = self._set_calculator(input_data, kpts, calc_type="scf")
 
         energy = self.atoms.get_potential_energy()
         print(f"[INFO] SCF complete. Total energy: {energy:.6f} eV")
@@ -119,7 +124,16 @@ class DFT:
         if input_data.get("control", {}).get("calculation") != "bands":
             raise ValueError("Input data must specify 'calculation = bands'.")
 
-        self.atoms.calc = self._set_calculator(input_data, band_kpts)
+        self.atoms.calc = self._set_calculator(input_data, band_kpts, calc_type="bands")
+        results_bands = self.atoms.get_properties(['eigenvalues'])
+        
+        path = bandpath(list(band_kpts["path"]), cell=self.atoms.cell, npoints=band_kpts["npoints"])
 
-        energy = self.atoms.get_potential_energy()
-        print("[INFO] Band structure calculation complete.Total energy: {energy:.6f} eV")
+        bs = BandStructure(
+            path=path,
+            energies=results_bands['eigenvalues']
+            # reference=self.atoms.calc.get_fermi_level()
+        )
+        bs.write("outputs/bs.json")
+
+        print("[INFO] Band structure calculation complete.")
